@@ -65,6 +65,17 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 10px;
+            transition: all 0.3s;
+        }
+        #chat-container.fullscreen {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            bottom: auto;
+            right: auto;
+            border-radius: 0;
+            z-index: 1000;
         }
         #chat-messages {
             max-height: 200px;
@@ -73,10 +84,28 @@
             padding: 10px;
             margin-bottom: 10px;
         }
+        #chat-messages.fullscreen {
+            max-height: calc(100vh - 80px);
+        }
         #chat-input {
             width: calc(100% - 20px);
             padding: 5px;
             margin: 0;
+        }
+        #toggle-chat {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #toggle-chat:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -101,6 +130,7 @@
         <div id="log">Логи будут тут...</div>
     </div>
     <div id="chat-container">
+        <button id="toggle-chat" onclick="toggleChatSize()">⬜</button>
         <div id="chat-messages">Чат Minecraft будет тут...</div>
         <input type="text" id="chat-input" placeholder="Сообщение от ботов" onkeydown="if(event.key === 'Enter') sendChat()">
     </div>
@@ -117,20 +147,25 @@
             chatDiv.scrollTop = chatDiv.scrollHeight;
         }
 
-        // Подключение к WebSocket
-        const ws = new WebSocket('wss://minecraftstartbot.onrender.com');
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'chat') {
-                addChatMessage(data.message);
-            }
-        };
-        ws.onerror = (error) => {
-            log('Ошибка WebSocket: ' + error.message);
-        };
-        ws.onclose = () => {
-            log('WebSocket соединение закрыто');
-        };
+        // Подключение к WebSocket с попыткой переподключения
+        let ws;
+        function connectWebSocket() {
+            ws = new WebSocket('wss://minecraftstartbot.onrender.com');
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'chat') {
+                    addChatMessage(data.message);
+                }
+            };
+            ws.onerror = (error) => {
+                log('Ошибка WebSocket: ' + error.message);
+            };
+            ws.onclose = () => {
+                log('WebSocket соединение закрыто, переподключаюсь...');
+                setTimeout(connectWebSocket, 2000); // Переподключение через 2 секунды
+            };
+        }
+        connectWebSocket();
 
         async function startBots() {
             const ip = document.getElementById('ip').value;
@@ -199,6 +234,13 @@
             } catch (err) {
                 log(`Ошибка: ${err.message}`);
             }
+        }
+
+        function toggleChatSize() {
+            const chatContainer = document.getElementById('chat-container');
+            const chatMessages = document.getElementById('chat-messages');
+            chatContainer.classList.toggle('fullscreen');
+            chatMessages.classList.toggle('fullscreen');
         }
     </script>
 </body>
