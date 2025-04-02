@@ -110,7 +110,7 @@ function keepBotActive(bot) {
             bot.look(yaw, 0, false); // Поворачиваем только по горизонтали
             console.log(`${bot.username} повернулся для активности`);
         }
-    }, 10000); // Каждые 10 секунд
+    }, 30000); // Каждые 30 секунд
 }
 
 const PORT = process.env.PORT || 3000;
