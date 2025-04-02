@@ -34,7 +34,7 @@ app.post('/start-bots', (req, res) => {
         } else {
             clearInterval(interval);
         }
-    }, 5000); // Запускаем ботов с задержкой 5 секунд
+    }, 5000); // Задержка 5 секунд между ботами
 
     res.json({ message: `Запущено ${botCount} ботов` });
 });
@@ -69,6 +69,7 @@ function createBot(ip, port, version, index) {
     bot.on('login', () => {
         console.log(`${bot.username} подключился`);
         activeBots.push(bot);
+        keepBotActive(bot); // Запускаем функцию активности
     });
 
     bot.on('error', (err) => {
@@ -94,9 +95,24 @@ function createBot(ip, port, version, index) {
             seenMessages.add(messageText);
         }
     });
+
+    bot.on('kicked', (reason) => {
+        console.log(`${bot.username} был кикнут: ${reason}`);
+    });
 }
 
-// Используем динамический порт для работы на Render
+// Функция для поддержания активности бота
+function keepBotActive(bot) {
+    setInterval(() => {
+        if (bot && bot.entity) { // Проверяем, что бот активен
+            // Случайный поворот камеры
+            const yaw = Math.random() * Math.PI * 2; // Случайный угол (0-360 градусов)
+            bot.look(yaw, 0, false); // Поворачиваем только по горизонтали
+            console.log(`${bot.username} повернулся для активности`);
+        }
+    }, 10000); // Каждые 10 секунд
+}
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
