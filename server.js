@@ -10,7 +10,7 @@ const seenMessages = new Set();
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://makuzan.github.io' // Разрешаем запросы только с твоего сайта
+    origin: 'https://makuzan.github.io' // Разрешаем запросы с твоего фронтенда
 }));
 
 app.post('/start-bots', (req, res) => {
