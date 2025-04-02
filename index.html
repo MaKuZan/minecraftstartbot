@@ -19,6 +19,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
         }
         label {
             display: block;
@@ -37,11 +38,18 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-bottom: 10px;
         }
         button:hover {
             background-color: #218838;
         }
-        #log {
+        #stopBots {
+            background-color: #dc3545;
+        }
+        #stopBots:hover {
+            background-color: #c82333;
+        }
+        #log, #chat {
             margin-top: 20px;
             max-height: 200px;
             overflow-y: auto;
@@ -66,12 +74,14 @@
         <input type="number" id="botCount" min="1" max="100" placeholder="1-100" required>
         
         <button onclick="startBots()">Запустить ботов</button>
+        <button id="stopBots" onclick="stopBots()">Остановить ботов</button>
         
         <label for="chatMessage">Сообщение в чат:</label>
         <input type="text" id="chatMessage" placeholder="Введите сообщение">
         <button onclick="sendChat()">Отправить от всех ботов</button>
         
         <div id="log">Логи будут тут...</div>
+        <div id="chat">Чат Minecraft будет тут...</div>
     </div>
     <script>
         function log(message) {
@@ -79,6 +89,27 @@
             logDiv.innerHTML += `${new Date().toLocaleTimeString()} - ${message}<br>`;
             logDiv.scrollTop = logDiv.scrollHeight;
         }
+
+        function addChatMessage(message) {
+            const chatDiv = document.getElementById('chat');
+            chatDiv.innerHTML += `${new Date().toLocaleTimeString()} - ${message}<br>`;
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+
+        // Подключение к WebSocket
+        const ws = new WebSocket('wss://minecraftstartbot.onrender.com');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'chat') {
+                addChatMessage(data.message);
+            }
+        };
+        ws.onerror = (error) => {
+            log('Ошибка WebSocket: ' + error.message);
+        };
+        ws.onclose = () => {
+            log('WebSocket соединение закрыто');
+        };
 
         async function startBots() {
             const ip = document.getElementById('ip').value;
@@ -103,6 +134,20 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ip, port, version, botCount })
+                });
+                const result = await response.json();
+                log(result.message);
+            } catch (err) {
+                log(`Ошибка: ${err.message}`);
+            }
+        }
+
+        async function stopBots() {
+            log('Отправляю запрос на остановку ботов...');
+            try {
+                const response = await fetch('https://minecraftstartbot.onrender.com/stop-bots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 const result = await response.json();
                 log(result.message);
