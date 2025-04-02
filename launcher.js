@@ -34,7 +34,7 @@ function createBot(ip, port, version, index) {
         host: ip,
         port: port,
         version: version,
-        username: `Bot_${index}` // Уникальное имя для каждого бота
+        username: `WBosdOsdT_${index}` // Уникальное имя для каждого бота
     });
 
     bot.on('login', () => {
