@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Bot Launcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .launcher {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #log {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="launcher">
+        <h2>Minecraft Bot Launcher</h2>
+        <label for="ip">IP сервера:</label>
+        <input type="text" id="ip" placeholder="например, e1.aurorix.net" required>
+        
+        <label for="port">Порт:</label>
+        <input type="number" id="port" placeholder="например, 20147" required>
+        
+        <label for="version">Версия Minecraft:</label>
+        <input type="text" id="version" placeholder="например, 1.20.2" required>
+        
+        <label for="botCount">Количество ботов (макс 100):</label>
+        <input type="number" id="botCount" min="1" max="100" placeholder="1-100" required>
+        
+        <button onclick="startBots()">Запустить ботов</button>
+        
+        <label for="chatMessage">Сообщение в чат:</label>
+        <input type="text" id="chatMessage" placeholder="Введите сообщение">
+        <button onclick="sendChat()">Отправить от всех ботов</button>
+        
+        <div id="log">Логи будут тут...</div>
+    </div>
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `${new Date().toLocaleTimeString()} - ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function startBots() {
+            const ip = document.getElementById('ip').value;
+            const port = parseInt(document.getElementById('port').value);
+            const version = document.getElementById('version').value;
+            const botCount = parseInt(document.getElementById('botCount').value);
+
+            if (!ip || !port || !version || !botCount) {
+                log('Ошибка: Заполните все поля!');
+                return;
+            }
+
+            if (botCount > 100) {
+                log('Ошибка: Максимум 100 ботов!');
+                return;
+            }
+
+            log(`Отправляю запрос на запуск ${botCount} ботов...`);
+
+            try {
+                const response = await fetch('http://localhost:3000/start-bots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, port, version, botCount })
+                });
+                const result = await response.json();
+                log(result.message);
+            } catch (err) {
+                log(`Ошибка: ${err.message}`);
+            }
+        }
+
+        async function sendChat() {
+            const message = document.getElementById('chatMessage').value;
+
+            if (!message) {
+                log('Ошибка: Введите сообщение!');
+                return;
+            }
+
+            log(`Отправляю сообщение "${message}" от всех ботов...`);
+
+            try {
+                const response = await fetch('http://localhost:3000/send-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const result = await response.json();
+                log(result.message);
+            } catch (err) {
+                log(`Ошибка: ${err.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
