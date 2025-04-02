@@ -9,7 +9,9 @@ const activeBots = [];
 const seenMessages = new Set();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://makuzan.github.io' // Разрешаем запросы только с твоего сайта
+}));
 
 app.post('/start-bots', (req, res) => {
     const { ip, port, version, botCount } = req.body;
