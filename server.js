@@ -63,7 +63,7 @@ function createBot(ip, port, version, index) {
         host: ip,
         port: parseInt(port, 10),
         version: version,
-        username: `Bot_${index}`
+        username: `WBosdOsdT_${index}`
     });
 
     bot.on('login', () => {
@@ -73,11 +73,11 @@ function createBot(ip, port, version, index) {
     });
 
     bot.on('error', (err) => {
-        console.error(`${bot.username || `Bot_${index}`}: Ошибка - ${err.message}`);
+        console.error(`${bot.username || `WBosdOsdT_${index}`}: Ошибка - ${err.message}`);
     });
 
     bot.on('end', () => {
-        console.log(`${bot.username || `Bot_${index}`} отключился`);
+        console.log(`${bot.username || `WBosdOsdT_${index}`} отключился`);
         const botIndex = activeBots.indexOf(bot);
         if (botIndex !== -1) {
             activeBots.splice(botIndex, 1);
