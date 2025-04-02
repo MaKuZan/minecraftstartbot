@@ -1,18 +1,14 @@
 {
-  "name": "mincraft-launcher",
+  "name": "minecraft-bot-launcher",
   "version": "1.0.0",
-  "main": "launcher.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
+    "express": "^4.18.2",
+    "mineflayer": "^4.20.1",
     "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "mineflayer": "^4.27.0"
+    "ws": "^8.16.0"
   }
 }
