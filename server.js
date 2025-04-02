@@ -70,6 +70,7 @@ app.post('/send-chat', (req, res) => {
     activeBots.forEach(bot => {
         bot.chat(message);
         console.log(`${bot.username}: ${message}`);
+        broadcastChat(`${bot.username}: ${message}`); // Добавляем имя бота в чат
     });
 
     res.json({ message: `Сообщение "${message}" отправлено от ${activeBots.length} ботов` });
@@ -139,7 +140,9 @@ function keepBotActive(bot) {
         if (bot && bot.entity) { // Проверяем, что бот активен
             const yaw = Math.random() * Math.PI * 2; // Случайный угол (0-360 градусов)
             bot.look(yaw, 0, false); // Поворачиваем только по горизонтали
-            console.log(`${bot.username} повернулся для активности`);
+            bot.setControlState('jump', true); // Прыжок
+            setTimeout(() => bot.setControlState('jump', false), 500);
+            console.log(`${bot.username} повернулся и прыгнул для активности`);
         }
     }, 60000); // Каждые 60 секунд (1 минута)
 }
