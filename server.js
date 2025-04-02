@@ -24,7 +24,7 @@ app.post('/start-bots', (req, res) => {
 
     console.log(`Запускаю ${botCount} ботов на ${ip}:${port} (версия ${version})...`);
 
-    let botIndex = 1; // Начинаем с 1
+    let botIndex = 1;
     const interval = setInterval(() => {
         if (botIndex <= botCount) {
             createBot(ip, port, version, botIndex);
@@ -32,7 +32,7 @@ app.post('/start-bots', (req, res) => {
         } else {
             clearInterval(interval);
         }
-    }, 5000); // Задержка 5 секунд между ботами
+    }, 5000); // Запускаем ботов с задержкой 5 секунд
 
     res.json({ message: `Запущено ${botCount} ботов` });
 });
@@ -59,27 +59,25 @@ app.post('/send-chat', (req, res) => {
 function createBot(ip, port, version, index) {
     const bot = mineflayer.createBot({
         host: ip,
-        port: port,
+        port: parseInt(port, 10),
         version: version,
-        username: `Bot_${index}` // Имя начинается с Bot_1
-        // Если нужно использовать прокси, раскомментируй:
-        // proxy: 'socks://username:password@proxy.example.com:1080'
+        username: `Bot_${index}`
     });
 
     bot.on('login', () => {
         console.log(`${bot.username} подключился`);
-        activeBots.push(bot); // Добавляем бота в массив активных
+        activeBots.push(bot);
     });
 
     bot.on('error', (err) => {
-        console.log(`${bot.username || `Bot_${index}`}: Ошибка - ${err.message}`);
+        console.error(`${bot.username || `Bot_${index}`}: Ошибка - ${err.message}`);
     });
 
     bot.on('end', () => {
         console.log(`${bot.username || `Bot_${index}`} отключился`);
         const botIndex = activeBots.indexOf(bot);
         if (botIndex !== -1) {
-            activeBots.splice(botIndex, 1); // Удаляем бота из активных при отключении
+            activeBots.splice(botIndex, 1);
         }
     });
 
@@ -89,7 +87,6 @@ function createBot(ip, port, version, index) {
 
     bot.on('message', (message) => {
         const messageText = message.toString();
-        // Выводим сообщение только если оно еще не встречалось
         if (!seenMessages.has(messageText)) {
             console.log(`${messageText}`);
             seenMessages.add(messageText);
@@ -97,6 +94,8 @@ function createBot(ip, port, version, index) {
     });
 }
 
-app.listen(3000, () => {
-    console.log('Сервер запущен на http://localhost:3000');
+// Используем динамический порт для работы на Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Сервер запущен на порту ${PORT}`);
 });
